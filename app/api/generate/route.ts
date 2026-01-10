@@ -31,7 +31,9 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            prompt: prompt,
+            input: {
+              prompt: prompt,
+            }
           }),
         });
 
@@ -43,51 +45,13 @@ export async function POST(req: Request) {
           }
         }
         
-        // If the real API call fails (e.g. invalid key or timeout), we fall back to a 
-        // high-quality AI-generated sample that matches the prompt to ensure the UI still works
-        console.warn("Real AI Video API call failed or returned unexpected data, using high-quality AI fallback");
-        
-        const aiVideoLibrary = [
-          { 
-            keywords: ["ocean", "sea", "water", "beach", "waves", "island"], 
-            url: "https://vjs.zencdn.net/v/oceans.mp4" 
-          },
-          { 
-            keywords: ["forest", "tree", "nature", "green", "woods", "jungle"], 
-            url: "https://www.w3schools.com/html/mov_bbb.mp4" 
-          },
-          { 
-            keywords: ["city", "urban", "building", "street", "traffic", "night"], 
-            url: "https://media.w3.org/2010/05/sintel/trailer.mp4" 
-          },
-          { 
-            keywords: ["space", "stars", "galaxy", "universe", "planet", "astronomy"], 
-            url: "https://media.w3.org/2010/05/video/movie_300.mp4" 
-          },
-        ];
-
-        const lowercasePrompt = prompt.toLowerCase();
-        let bestMatch = aiVideoLibrary[0];
-        let maxMatches = 0;
-
-        for (const video of aiVideoLibrary) {
-          const matchCount = video.keywords.filter(keyword => lowercasePrompt.includes(keyword)).length;
-          if (matchCount > maxMatches) {
-            maxMatches = matchCount;
-            bestMatch = video;
-          }
-        }
-
-        return NextResponse.json({ url: bestMatch.url, type: "video", resolution });
+        const errorData = await response.text();
+        console.error("Real AI Video API call failed:", errorData);
+        return NextResponse.json({ error: "Real AI Video generation failed. Please check your API key or try again later." }, { status: 500 });
 
       } catch (apiError) {
         console.error("Error calling Video AI API:", apiError);
-        // Return a fallback video even on error so the user sees something AI-like
-        return NextResponse.json({ 
-          url: "https://vjs.zencdn.net/v/oceans.mp4", 
-          type: "video", 
-          resolution 
-        });
+        return NextResponse.json({ error: "Failed to connect to AI Video service." }, { status: 500 });
       }
     }
   } catch (error) {
