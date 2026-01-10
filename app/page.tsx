@@ -9,10 +9,12 @@ export default function Home() {
   const [resolution, setResolution] = useState("1080p");
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<{ url: string; type: "image" | "video"; resolution: string } | null>(null);
+  const [isMediaLoading, setIsMediaLoading] = useState(false);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setResult(null);
+    setIsMediaLoading(true);
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -132,37 +134,70 @@ export default function Home() {
         </button>
 
         {result && (
-          <div className="mt-10 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="mt-10 space-y-4 transition-all duration-500 ease-out">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Generated {type.toUpperCase()}</h3>
-              <a 
-                href={result.url} 
-                download={`generated-${type}.png`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-              >
-                Download {result.resolution.toUpperCase()}
-              </a>
+              <div className="flex gap-4">
+                <a 
+                  href={result.url} 
+                  download={`generated-${type}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                >
+                  Open Original
+                </a>
+              </div>
             </div>
-            <div className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 shadow-inner">
+            <div className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 shadow-inner min-h-[300px] flex items-center justify-center">
+              {isMediaLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 backdrop-blur-sm z-10">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+                    <p className="text-xs font-medium text-zinc-500">Loading media...</p>
+                  </div>
+                </div>
+              )}
               {result.type === "image" ? (
                 <img 
                   src={result.url} 
                   alt={prompt} 
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" 
+                  className={`w-full h-auto object-cover transition-all duration-700 group-hover:scale-105 ${isMediaLoading ? 'opacity-0' : 'opacity-100'}`}
+                  onLoad={() => {
+                    console.log("Image loaded successfully");
+                    setIsMediaLoading(false);
+                  }}
+                  onError={(e) => {
+                    console.error("Image failed to load:", result.url);
+                    setIsMediaLoading(false);
+                    e.currentTarget.src = "https://placehold.co/600x400?text=Image+Load+Error";
+                  }}
                 />
               ) : (
                 <video 
+                  key={result.url}
                   src={result.url} 
                   controls 
-                  className="w-full h-auto" 
+                  className={`w-full h-auto transition-opacity duration-700 ${isMediaLoading ? 'opacity-0' : 'opacity-100'}`}
                   autoPlay 
                   loop 
                   muted
-                />
+                  onLoadedData={() => {
+                    console.log("Video loaded successfully");
+                    setIsMediaLoading(false);
+                  }}
+                  onError={(e) => {
+                    console.error("Video failed to load:", result.url);
+                    setIsMediaLoading(false);
+                  }}
+                >
+                  Your browser does not support the video tag.
+                </video>
               )}
             </div>
+            <p className="text-xs text-zinc-500 text-center">
+              Resolution: {result.resolution.toUpperCase()} • Type: {result.type === 'image' ? 'HD Photo' : 'HD Video'}
+            </p>
           </div>
         )}
       </main>
