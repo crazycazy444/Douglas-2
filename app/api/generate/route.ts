@@ -26,30 +26,31 @@ export async function POST(req: Request) {
       // const result = await fal.subscribe("fal-ai/luma-dream-machine", { input: { prompt } });
       
       // For this implementation, we simulate the high-quality output from this specific API
+      // Using reliable direct video links that allow hotlinking
       const videoLibrary = [
         { 
           keywords: ["ocean", "sea", "water", "beach", "waves", "island"], 
-          url: "https://cdn.pixabay.com/video/2023/10/22/186082-877478051_large.mp4" 
+          url: "https://vjs.zencdn.net/v/oceans.mp4" 
         },
         { 
           keywords: ["forest", "tree", "nature", "green", "woods", "jungle"], 
-          url: "https://cdn.pixabay.com/video/2022/08/01/126297-735741434_large.mp4" 
+          url: "https://www.w3schools.com/html/mov_bbb.mp4" 
         },
         { 
           keywords: ["city", "urban", "building", "street", "traffic", "night"], 
-          url: "https://cdn.pixabay.com/video/2020/09/25/51041-464166249_large.mp4" 
+          url: "https://media.w3.org/2010/05/sintel/trailer.mp4" 
         },
         { 
           keywords: ["space", "stars", "galaxy", "universe", "planet", "astronomy"], 
-          url: "https://cdn.pixabay.com/video/2021/04/05/70271-534726589_large.mp4" 
+          url: "https://media.w3.org/2010/05/video/movie_300.mp4" 
         },
         { 
           keywords: ["mountain", "snow", "peak", "alp", "winter", "cold"], 
-          url: "https://cdn.pixabay.com/video/2016/01/29/1986-152914041_large.mp4" 
+          url: "https://vjs.zencdn.net/v/oceans.mp4" 
         },
         { 
           keywords: ["abstract", "color", "light", "art", "moving", "background"], 
-          url: "https://cdn.pixabay.com/video/2021/04/23/71988-541578502_large.mp4" 
+          url: "https://media.w3.org/2010/05/sintel/trailer.mp4" 
         },
       ];
 

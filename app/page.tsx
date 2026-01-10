@@ -162,7 +162,7 @@ export default function Home() {
                 <img 
                   src={result.url} 
                   alt={prompt} 
-                  className={`w-full h-auto object-cover transition-all duration-700 group-hover:scale-105 ${isMediaLoading ? 'opacity-0' : 'opacity-100'}`}
+                  className="w-full h-auto object-cover transition-all duration-700 group-hover:scale-105"
                   onLoad={() => {
                     console.log("Image loaded successfully");
                     setIsMediaLoading(false);
@@ -174,25 +174,36 @@ export default function Home() {
                   }}
                 />
               ) : (
-                <video 
-                  key={result.url}
-                  src={result.url} 
-                  controls 
-                  className={`w-full h-auto transition-opacity duration-700 ${isMediaLoading ? 'opacity-0' : 'opacity-100'}`}
-                  autoPlay 
-                  loop 
-                  muted
-                  onLoadedData={() => {
-                    console.log("Video loaded successfully");
-                    setIsMediaLoading(false);
-                  }}
-                  onError={(e) => {
-                    console.error("Video failed to load:", result.url);
-                    setIsMediaLoading(false);
-                  }}
-                >
-                  Your browser does not support the video tag.
-                </video>
+                <div className="relative w-full h-full">
+                  <video 
+                    key={result.url}
+                    src={result.url} 
+                    controls 
+                    className="w-full h-auto"
+                    autoPlay 
+                    loop 
+                    muted
+                    playsInline
+                    onCanPlay={() => {
+                      console.log("Video can play");
+                      setIsMediaLoading(false);
+                    }}
+                    onLoadStart={() => {
+                      setIsMediaLoading(true);
+                    }}
+                    onError={(e) => {
+                      console.error("Video failed to load:", result.url);
+                      setIsMediaLoading(false);
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                  {!isMediaLoading && (
+                    <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm pointer-events-none">
+                      HD VIDEO
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <p className="text-xs text-zinc-500 text-center">
