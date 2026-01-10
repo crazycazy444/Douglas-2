@@ -9,24 +9,55 @@ export async function POST(req: Request) {
     await new Promise((resolve) => setTimeout(resolve, delay));
 
     if (type === "image") {
-      // HD images from Unsplash (curated high-quality ones)
-      const images = [
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1920",
-        "https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&q=80&w=1920",
-        "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&q=80&w=1920",
-        "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1920",
-      ];
-      const randomImage = images[Math.floor(Math.random() * images.length)];
-      return NextResponse.json({ url: randomImage, type: "image", resolution });
+      // Use Pollinations AI for real prompt-based image generation
+      // This is a free, no-key-required AI image generation service
+      const encodedPrompt = encodeURIComponent(prompt);
+      const seed = Math.floor(Math.random() * 1000000);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1920&height=1080&nologo=true&seed=${seed}`;
+      
+      return NextResponse.json({ url: imageUrl, type: "image", resolution });
     } else {
-      // Reliable HD sample videos
-      const videos = [
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      // Improved video selection based on prompt keywords
+      const videoLibrary = [
+        { 
+          keywords: ["ocean", "sea", "water", "beach", "waves", "island"], 
+          url: "https://cdn.pixabay.com/video/2023/10/22/186082-877478051_large.mp4" 
+        },
+        { 
+          keywords: ["forest", "tree", "nature", "green", "woods", "jungle"], 
+          url: "https://cdn.pixabay.com/video/2022/08/01/126297-735741434_large.mp4" 
+        },
+        { 
+          keywords: ["city", "urban", "building", "street", "traffic", "night"], 
+          url: "https://cdn.pixabay.com/video/2020/09/25/51041-464166249_large.mp4" 
+        },
+        { 
+          keywords: ["space", "stars", "galaxy", "universe", "planet", "astronomy"], 
+          url: "https://cdn.pixabay.com/video/2021/04/05/70271-534726589_large.mp4" 
+        },
+        { 
+          keywords: ["mountain", "snow", "peak", "alp", "winter", "cold"], 
+          url: "https://cdn.pixabay.com/video/2016/01/29/1986-152914041_large.mp4" 
+        },
+        { 
+          keywords: ["abstract", "color", "light", "art", "moving", "background"], 
+          url: "https://cdn.pixabay.com/video/2021/04/23/71988-541578502_large.mp4" 
+        },
       ];
-      const randomVideo = videos[Math.floor(Math.random() * videos.length)];
-      return NextResponse.json({ url: randomVideo, type: "video", resolution });
+
+      const lowercasePrompt = prompt.toLowerCase();
+      let bestMatch = videoLibrary[5]; // Default to abstract
+      let maxMatches = 0;
+
+      for (const video of videoLibrary) {
+        const matchCount = video.keywords.filter(keyword => lowercasePrompt.includes(keyword)).length;
+        if (matchCount > maxMatches) {
+          maxMatches = matchCount;
+          bestMatch = video;
+        }
+      }
+
+      return NextResponse.json({ url: bestMatch.url, type: "video", resolution });
     }
   } catch (error) {
     console.error("Error in generation API:", error);
