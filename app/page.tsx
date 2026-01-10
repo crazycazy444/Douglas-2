@@ -196,7 +196,7 @@ export default function Home() {
               )}
             </div>
             <p className="text-xs text-zinc-500 text-center">
-              Resolution: {result.resolution.toUpperCase()} • Type: {result.type === 'image' ? 'HD Photo' : 'HD Video'}
+              Resolution: {result.resolution.toUpperCase()} • Type: {result.type === 'image' ? 'HD Photo' : 'HD Video'} • Model: {result.type === 'image' ? 'Pollinations AI' : 'Luma DM (av0kd8dph)'}
             </p>
           </div>
         )}
