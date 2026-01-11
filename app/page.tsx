@@ -10,10 +10,12 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<{ url: string; type: "image" | "video"; resolution: string } | null>(null);
   const [isMediaLoading, setIsMediaLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setResult(null);
+    setError(null);
     setIsMediaLoading(true);
     try {
       const response = await fetch("/api/generate", {
@@ -21,12 +23,18 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, type, duration, resolution }),
       });
-      if (!response.ok) throw new Error("Failed to generate");
+      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate");
+      }
+      
       setResult(data);
-    } catch (error) {
-      console.error("Generation failed", error);
-      alert("Something went wrong during generation. Please try again.");
+    } catch (err) {
+      console.error("Generation failed", err);
+      const message = err instanceof Error ? err.message : "Something went wrong during generation. Please try again.";
+      setError(message);
     } finally {
       setIsGenerating(false);
     }
@@ -133,6 +141,18 @@ export default function Home() {
           ) : `Generate ${type === 'image' ? 'HD Image' : 'HD Video'}`}
         </button>
 
+        {error && (
+          <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-2">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-semibold">Generation Error:</span>
+            </div>
+            <p className="mt-1 ml-6">{error}</p>
+          </div>
+        )}
+
         {result && (
           <div className="mt-10 space-y-4 transition-all duration-500 ease-out">
             <div className="flex items-center justify-between">
@@ -170,7 +190,7 @@ export default function Home() {
                   onError={(e) => {
                     console.error("Image failed to load:", result.url);
                     setIsMediaLoading(false);
-                    e.currentTarget.src = "https://placehold.co/600x400?text=Image+Load+Error";
+                    (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=Image+Load+Error";
                   }}
                 />
               ) : (
@@ -191,7 +211,7 @@ export default function Home() {
                     onLoadStart={() => {
                       setIsMediaLoading(true);
                     }}
-                    onError={(e) => {
+                    onError={() => {
                       console.error("Video failed to load:", result.url);
                       setIsMediaLoading(false);
                     }}
